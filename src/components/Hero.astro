@@ -1,0 +1,156 @@
+---
+import { Image } from 'astro:assets';
+import { site, drinks } from '../data/site';
+import { getPhoto, photoMeta } from '../lib/photos';
+
+const heroPhoto = getPhoto('hero');
+const first = drinks[0];
+const price = (k: number) => `Rp ${k}.000`;
+---
+
+<section class="relative isolate overflow-hidden">
+  {
+    heroPhoto && (
+      <>
+        <Image
+          src={heroPhoto}
+          alt={photoMeta('hero')?.alt ?? ''}
+          widths={[640, 1024, 1600]}
+          sizes="100vw"
+          format="webp"
+          loading="eager"
+          fetchpriority="high"
+          class="absolute inset-0 -z-20 h-full w-full object-cover"
+        />
+        <div class="absolute inset-0 -z-10 bg-gradient-to-r from-bg via-bg/85 to-bg/40" aria-hidden="true" />
+        <div class="absolute inset-x-0 bottom-0 -z-10 h-40 bg-gradient-to-t from-bg to-transparent" aria-hidden="true" />
+      </>
+    )
+  }
+
+  <div class="wrap grid items-center gap-10 pb-16 pt-8 lg:grid-cols-[1.1fr_1fr] lg:gap-8 lg:pb-24 lg:pt-14">
+    <div>
+      <h1 class="display text-[clamp(3.2rem,9vw,7rem)]">
+        Cold drinks,<br />made slowly.
+      </h1>
+      <p class="mt-6 max-w-[34rem] text-lg text-muted">{site.intro}</p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a href="#menu" class="btn btn-accent">See the menu</a>
+        <a href="#visit" class="btn btn-line">Find us</a>
+      </div>
+      <p class="mt-8 text-[0.95rem] text-muted">
+        Hours vary by day · See opening hours below
+      </p>
+    </div>
+
+    <div id="cup-stage" class="relative mx-auto w-full max-w-[26rem] lg:max-w-none">
+      <div
+        id="cup-glow"
+        class="pointer-events-none absolute left-1/2 top-[44%] -z-10 h-[78%] w-[78%] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-45 blur-[70px] transition-[background-color] duration-700"
+        style={`background:${first.glow}`}
+        aria-hidden="true"
+      >
+      </div>
+
+      <svg
+        id="cup"
+        viewBox="0 0 260 380"
+        class="mx-auto h-[min(26rem,62vw)] w-auto drop-shadow-[0_30px_30px_rgba(0,0,0,0.45)] lg:h-[28rem]"
+        role="img"
+        aria-label="Illustration of the selected drink in a clear cup"
+        style={`--l1:${first.layers[0]};--l2:${first.layers[1]};--l3:${first.layers[2]};--straw:${first.straw}`}
+      >
+        <defs>
+          <clipPath id="cup-clip">
+            <path d="M48 72 H212 L192 338 Q191 352 177 352 H83 Q69 352 68 338 Z"></path>
+          </clipPath>
+          <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="7"></feGaussianBlur>
+          </filter>
+        </defs>
+
+        <path d="M48 72 H212 L192 338 Q191 352 177 352 H83 Q69 352 68 338 Z" fill="#ffffff" fill-opacity="0.07"></path>
+
+        <g clip-path="url(#cup-clip)">
+          <g filter="url(#soft)">
+            <rect class="layer" x="20" y="96" width="220" height="80" style="fill:var(--l1)"></rect>
+            <rect class="layer" x="20" y="164" width="220" height="100" style="fill:var(--l2)"></rect>
+            <rect class="layer" x="20" y="252" width="220" height="120" style="fill:var(--l3)"></rect>
+          </g>
+          <g fill="#ffffff" fill-opacity="0.34" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1.5">
+            <rect x="62" y="82" width="46" height="46" rx="9" transform="rotate(-12 85 105)"></rect>
+            <rect x="118" y="92" width="44" height="44" rx="9" transform="rotate(9 140 114)"></rect>
+            <rect x="158" y="80" width="40" height="42" rx="9" transform="rotate(-6 178 101)"></rect>
+            <rect x="92" y="150" width="38" height="38" rx="8" transform="rotate(16 111 169)"></rect>
+          </g>
+          <path d="M66 90 L82 330" stroke="#ffffff" stroke-opacity="0.16" stroke-width="10" stroke-linecap="round"></path>
+        </g>
+
+        <line x1="150" y1="14" x2="132" y2="262" stroke-width="10" stroke-linecap="round" style="stroke:var(--straw)"></line>
+        <path d="M48 72 H212 L192 338 Q191 352 177 352 H83 Q69 352 68 338 Z" fill="none" stroke="#f3ead9" stroke-opacity="0.7" stroke-width="2.5" stroke-linejoin="round"></path>
+        <rect x="40" y="62" width="180" height="12" rx="6" fill="none" stroke="#f3ead9" stroke-opacity="0.7" stroke-width="2.5"></rect>
+      </svg>
+
+      <div class="mt-6 text-center" aria-live="polite">
+        <p id="drink-name" class="font-display text-3xl">{first.name}</p>
+        <p id="drink-note" class="mx-auto mt-2 max-w-sm text-[0.98rem] text-muted">{first.note}</p>
+        <p id="drink-price" class="mt-2 font-semibold text-accent">{price(first.price)}</p>
+      </div>
+
+      <div class="mt-5 flex flex-wrap justify-center gap-2" role="group" aria-label="Choose a drink to preview">
+        {
+          drinks.map((d, i) => (
+            <button
+              type="button"
+              class="drink-chip rounded-full px-4 py-2 text-[0.95rem] font-medium shadow-[inset_0_0_0_1.5px_var(--color-line)] transition-colors hover:shadow-[inset_0_0_0_1.5px_var(--color-muted)] aria-pressed:bg-cream aria-pressed:text-ink aria-pressed:shadow-none"
+              aria-pressed={i === 0 ? 'true' : 'false'}
+              data-drink={JSON.stringify(d)}
+            >
+              {d.name}
+            </button>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  #cup .layer {
+    transition: fill 0.7s ease;
+  }
+  #cup line {
+    transition: stroke 0.7s ease;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #cup .layer,
+    #cup line {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  const cup = document.getElementById('cup') as unknown as SVGElement | null;
+  const glow = document.getElementById('cup-glow') as HTMLElement | null;
+  const name = document.getElementById('drink-name');
+  const note = document.getElementById('drink-note');
+  const price = document.getElementById('drink-price');
+  const chips = Array.from(document.querySelectorAll<HTMLButtonElement>('.drink-chip'));
+
+  chips.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const d = JSON.parse(chip.dataset.drink || '{}');
+      if (!cup || !d.layers) return;
+      cup.style.setProperty('--l1', d.layers[0]);
+      cup.style.setProperty('--l2', d.layers[1]);
+      cup.style.setProperty('--l3', d.layers[2]);
+      cup.style.setProperty('--straw', d.straw);
+      if (glow) glow.style.backgroundColor = d.glow;
+      if (name) name.textContent = d.name;
+      if (note) note.textContent = d.note;
+      if (price) price.textContent = `Rp ${d.price}.000`;
+      chips.forEach((c) => c.setAttribute('aria-pressed', c === chip ? 'true' : 'false'));
+    });
+  });
+</script>

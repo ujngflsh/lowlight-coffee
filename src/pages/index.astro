@@ -1,0 +1,33 @@
+---
+import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import Hero from '../components/Hero.astro';
+import Menu from '../components/Menu.astro';
+import Story from '../components/Story.astro';
+import Gallery from '../components/Gallery.astro';
+import Visit from '../components/Visit.astro';
+import Reserve from '../components/Reserve.astro';
+import Footer from '../components/Footer.astro';
+import { availablePhotos } from '../lib/photos';
+
+if (!import.meta.env.PUBLIC_FORM_ENDPOINT) {
+  console.warn('\n[lowlight] PUBLIC_FORM_ENDPOINT belum diisi: formulir berjalan dalam mode demo (tidak mengirim apa pun).');
+}
+const withoutCredit = availablePhotos().filter((p) => !p.credit).map((p) => p.name);
+if (withoutCredit.length) {
+  console.warn(`[lowlight] Foto tanpa kredit di src/data/site.ts: ${withoutCredit.join(', ')}\n`);
+}
+---
+
+<Base>
+  <Header />
+  <main id="main">
+    <Hero />
+    <Menu />
+    <Story />
+    <div class="pt-20 lg:pt-28"><Gallery /></div>
+    <Visit />
+    <Reserve />
+  </main>
+  <Footer />
+</Base>

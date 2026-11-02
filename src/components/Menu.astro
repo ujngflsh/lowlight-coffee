@@ -1,0 +1,35 @@
+---
+import { menu } from '../data/site';
+---
+
+<section id="menu" class="wrap py-20 lg:py-28">
+  <div class="grid gap-12 lg:grid-cols-[1fr_2.2fr] lg:gap-16">
+    <div>
+      <h2 class="h2">What is on the counter</h2>
+      <p class="mt-5 max-w-sm text-muted">
+        A short menu on purpose. Prices are in thousand rupiah and invented for this project.
+      </p>
+    </div>
+    <div class="grid gap-x-14 gap-y-12 md:grid-cols-2">
+      {
+        menu.map((group) => (
+          <div>
+            <h3 class="font-display text-3xl italic text-accent">{group.title}</h3>
+            <p class="mt-1 text-[0.95rem] text-muted">{group.note}</p>
+            <ul class="mt-4 divide-y divide-line border-y border-line">
+              {group.items.map((item) => (
+                <li class="flex items-baseline justify-between gap-4 py-3">
+                  <span>
+                    <span class="font-medium">{item.name}</span>
+                    {item.note && <span class="block text-[0.95rem] text-muted">{item.note}</span>}
+                  </span>
+                  <span class="shrink-0 font-semibold tabular-nums">Rp {item.price}.000</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>

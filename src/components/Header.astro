@@ -1,0 +1,60 @@
+---
+import { site } from '../data/site';
+---
+
+<div class="bg-accent text-ink">
+  <p class="wrap py-2 text-center text-xs font-medium sm:text-sm">
+    Concept project by {site.maker}. {site.name} is fictional; details are illustrative only.
+  </p>
+</div>
+<header class="wrap relative z-20 flex items-center justify-between gap-4 py-5">
+  <a href="#top" class="font-display text-2xl leading-none" aria-label={`${site.name}, back to top`}>{site.name}</a>
+  <nav aria-label="Primary navigation" class="hidden items-center gap-7 text-[0.95rem] font-medium sm:flex">
+    <a href="#menu" class="hover:text-accent">Menu</a>
+    <a href="#story" class="hover:text-accent">Story</a>
+    <a href="#visit" class="hover:text-accent">Visit</a>
+    <a href="#reserve" class="btn btn-accent !min-h-0 !py-2.5">Reserve a table</a>
+  </nav>
+  <div class="sm:hidden">
+    <button id="mobile-menu-toggle" type="button" class="btn btn-line !min-h-0 !px-4 !py-2.5" aria-expanded="false" aria-controls="mobile-navigation">
+      <span id="mobile-menu-label">Menu</span>
+    </button>
+  </div>
+  <nav id="mobile-navigation" aria-label="Mobile navigation" class="absolute inset-x-5 top-full hidden rounded-2xl border border-line bg-surface p-4 shadow-xl sm:hidden">
+    <div class="grid gap-1">
+      <a href="#menu" class="rounded-lg px-3 py-3 hover:bg-raise">Menu</a>
+      <a href="#story" class="rounded-lg px-3 py-3 hover:bg-raise">Story</a>
+      <a href="#visit" class="rounded-lg px-3 py-3 hover:bg-raise">Visit</a>
+      <a href="#reserve" class="rounded-lg bg-accent px-3 py-3 font-semibold text-ink">Reserve a table</a>
+    </div>
+  </nav>
+</header>
+
+<script>
+  const toggle = document.getElementById('mobile-menu-toggle');
+  const navigation = document.getElementById('mobile-navigation');
+  const label = document.getElementById('mobile-menu-label');
+
+  if (toggle instanceof HTMLButtonElement && navigation && label) {
+    const closeMenu = () => {
+      navigation.classList.add('hidden');
+      toggle.setAttribute('aria-expanded', 'false');
+      label.textContent = 'Menu';
+    };
+
+    toggle.addEventListener('click', () => {
+      const isOpen = toggle.getAttribute('aria-expanded') === 'true';
+      navigation.classList.toggle('hidden', isOpen);
+      toggle.setAttribute('aria-expanded', String(!isOpen));
+      label.textContent = isOpen ? 'Menu' : 'Close';
+    });
+
+    navigation.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeMenu));
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        closeMenu();
+        toggle.focus();
+      }
+    });
+  }
+</script>

@@ -1,0 +1,33 @@
+---
+import { site } from '../data/site';
+---
+
+<section id="visit" class="wrap py-20 lg:py-28">
+  <div class="grid gap-12 lg:grid-cols-2 lg:gap-20">
+    <div>
+      <h2 class="h2">Two streets back from the park</h2>
+      <address class="mt-6 text-lg not-italic text-muted">
+        {site.address.map((line) => <span class="block">{line}</span>)}
+      </address>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a href={site.mapsUrl} class="btn btn-accent" rel="noopener">Open in Google Maps</a>
+        <a href={`mailto:${site.email}`} class="btn btn-line">Email us</a>
+      </div>
+      <p class="mt-4 text-[0.95rem] text-muted">Fictional address for this portfolio concept. The map link searches the city, not a verified storefront.</p>
+    </div>
+    <div>
+      <h3 class="font-display text-3xl italic text-accent">Opening hours</h3>
+      <dl class="mt-4 divide-y divide-line border-y border-line">
+        {
+          site.hours.map(([day, time]) => (
+            <div class="flex items-baseline justify-between gap-4 py-3.5">
+              <dt>{day}</dt>
+              <dd class="font-semibold tabular-nums">{time}</dd>
+            </div>
+          ))
+        }
+      </dl>
+      <p class="mt-4 text-[0.95rem] text-muted">Walk-ins are welcome in this concept. Reservations are suggested for groups of five or more or guests requesting a quieter corner.</p>
+    </div>
+  </div>
+</section>

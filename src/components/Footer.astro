@@ -1,0 +1,42 @@
+---
+import { site } from '../data/site';
+import { availablePhotos } from '../lib/photos';
+
+const credits = availablePhotos().filter((p) => p.credit);
+const year = new Date().getFullYear();
+---
+
+<footer class="wrap py-14 text-[0.95rem] text-muted">
+  <div class="grid gap-8 md:grid-cols-[1.4fr_1fr_1fr]">
+    <div>
+      <p class="font-display text-3xl text-cream">{site.name}</p>
+      <p class="mt-2 max-w-xs">A coffee bar that exists only in this portfolio.</p>
+    </div>
+    <div>
+      <p class="font-semibold text-cream">Visit</p>
+      {site.address.map((l) => <p>{l}</p>)}
+    </div>
+    {site.social.length > 0 && (
+      <div>
+        <p class="font-semibold text-cream">Follow</p>
+        <p class="flex flex-wrap gap-4">
+          {site.social.filter((s) => /^https:\/\//.test(s.href)).map((s) => (
+            <a class="underline underline-offset-4 hover:text-accent" href={s.href} target="_blank" rel="noopener noreferrer">{s.label}</a>
+          ))}
+        </p>
+      </div>
+    )}
+  </div>
+  <div class="mt-10 space-y-2 border-t border-line pt-6">
+    <p>
+      <strong class="text-cream">Concept project by {site.maker}.</strong>{' '}
+      {site.name} is a fictional brand. The name, address, menu, prices and opening hours are invented, and nothing on this page is a real review, award or business metric.
+    </p>
+    {
+      credits.length > 0 && (
+        <p>Photos: {credits.map((c) => c.credit).join(', ')}.</p>
+      )
+    }
+    <p>© {year} {site.maker}. Built with Astro and Tailwind CSS. No trackers, no cookies.</p>
+  </div>
+</footer>

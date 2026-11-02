@@ -1,0 +1,187 @@
+---
+import { site } from '../data/site';
+
+const endpoint = import.meta.env.PUBLIC_FORM_ENDPOINT || '';
+const times = [];
+for (let h = 8; h <= 19; h++) {
+  for (const m of ['00', '30']) times.push(`${String(h).padStart(2, '0')}:${m}`);
+}
+---
+
+<section id="reserve" class="bg-surface py-20 lg:py-28">
+  <div class="wrap grid gap-12 lg:grid-cols-[1fr_1.25fr] lg:gap-20">
+    <div>
+      <h2 class="h2">Save a table</h2>
+      <p class="mt-5 max-w-sm text-muted">
+        For groups of five or more, or a quiet corner on a Saturday. Send the details and we will write back to
+        confirm.
+      </p>
+      <p class="mt-6 max-w-sm text-[0.95rem] text-muted">
+        This is a portfolio demo. {
+          endpoint
+            ? 'The form is connected to a test inbox that belongs to the developer, not to a café.'
+            : 'In this build the form is not connected to an inbox, so nothing is sent.'
+        }
+      </p>
+    </div>
+
+    <div>
+      <form id="reserve-form" novalidate class="grid gap-5 sm:grid-cols-2" data-endpoint={endpoint}>
+        <div>
+          <label for="f-name" class="mb-1.5 block font-medium">Name</label>
+          <input id="f-name" name="name" type="text" autocomplete="name" required class="field" aria-describedby="err-name" />
+          <p id="err-name" class="mt-1.5 min-h-5 text-sm text-[#ffb4a2]" aria-live="polite"></p>
+        </div>
+        <div>
+          <label for="f-email" class="mb-1.5 block font-medium">Email</label>
+          <input id="f-email" name="email" type="email" autocomplete="email" required class="field" aria-describedby="err-email" />
+          <p id="err-email" class="mt-1.5 min-h-5 text-sm text-[#ffb4a2]" aria-live="polite"></p>
+        </div>
+        <div>
+          <label for="f-date" class="mb-1.5 block font-medium">Date</label>
+          <input id="f-date" name="date" type="date" required class="field [color-scheme:dark]" aria-describedby="err-date" />
+          <p id="err-date" class="mt-1.5 min-h-5 text-sm text-[#ffb4a2]" aria-live="polite"></p>
+        </div>
+        <div>
+          <label for="f-time" class="mb-1.5 block font-medium">Time</label>
+          <select id="f-time" name="time" required class="field [color-scheme:dark]" aria-describedby="err-time">
+            <option value="">Choose a time</option>
+            {times.map((t) => <option value={t}>{t}</option>)}
+          </select>
+          <p id="err-time" class="mt-1.5 min-h-5 text-sm text-[#ffb4a2]" aria-live="polite"></p>
+        </div>
+        <div>
+          <label for="f-guests" class="mb-1.5 block font-medium">Guests</label>
+          <select id="f-guests" name="guests" required class="field [color-scheme:dark]" aria-describedby="err-guests">
+            {[2, 3, 4, 5, 6, 7, 8, 10, 12].map((n) => <option value={n} selected={n === 5}>{n} people</option>)}
+          </select>
+          <p id="err-guests" class="mt-1.5 min-h-5 text-sm text-[#ffb4a2]" aria-live="polite"></p>
+        </div>
+        <div class="sm:col-span-2">
+          <label for="f-note" class="mb-1.5 block font-medium">Anything we should know? <span class="font-normal text-muted">(optional)</span></label>
+          <textarea id="f-note" name="note" rows="4" maxlength="500" class="field" aria-describedby="err-note"></textarea>
+          <p id="err-note" class="mt-1.5 min-h-5 text-sm text-[#ffb4a2]" aria-live="polite"></p>
+        </div>
+
+        <div class="hidden" aria-hidden="true">
+          <label>Leave this empty <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" /></label>
+        </div>
+
+        <div class="sm:col-span-2">
+          <button id="f-submit" type="submit" class="btn btn-accent w-full sm:w-auto">Send request</button>
+          <p id="f-status" role="status" class="mt-4 text-[0.98rem]"></p>
+        </div>
+      </form>
+
+      <div id="f-success" class="hidden rounded-2xl bg-raise p-8" tabindex="-1">
+        <p class="font-display text-4xl">Thank you<span id="f-success-name"></span>.</p>
+        <p class="mt-3 text-muted">We will reply to <span id="f-success-email" class="font-medium text-cream"></span> to confirm your table.</p>
+        <button id="f-again" type="button" class="btn btn-line mt-6">Send another request</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const form = document.getElementById('reserve-form') as HTMLFormElement | null;
+  if (form) {
+    const endpoint = form.dataset.endpoint || '';
+    const btn = document.getElementById('f-submit') as HTMLButtonElement;
+    const status = document.getElementById('f-status') as HTMLElement;
+    const success = document.getElementById('f-success') as HTMLElement;
+    const dateInput = document.getElementById('f-date') as HTMLInputElement;
+    const honeypot = form.querySelector<HTMLInputElement>('input[name="_gotcha"]');
+
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const now = new Date();
+    const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    dateInput.min = today;
+
+    const fields = ['name', 'email', 'date', 'time', 'guests', 'note'] as const;
+    const get = (id: string) => document.getElementById('f-' + id) as HTMLInputElement;
+    const setErr = (id: string, msg: string) => {
+      const el = get(id);
+      const out = document.getElementById('err-' + id);
+      if (out) out.textContent = msg;
+      if (msg) el.setAttribute('aria-invalid', 'true');
+      else el.removeAttribute('aria-invalid');
+    };
+
+    const validate = () => {
+      const v = {
+        name: get('name').value.trim(),
+        email: get('email').value.trim(),
+        date: get('date').value,
+        time: get('time').value,
+        note: get('note').value,
+      };
+      const errs: Record<string, string> = {};
+      if (v.name.length < 2 || v.name.length > 100) errs.name = 'Enter a name between 2 and 100 characters.';
+      if (v.email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email)) errs.email = 'Enter a valid email, like name@example.com.';
+      if (!v.date) errs.date = 'Choose a date.';
+      else if (v.date < today) errs.date = 'Choose today or a later date.';
+      if (!v.time) errs.time = 'Choose a time.';
+      if (!get('guests').value) errs.guests = 'Choose the number of guests.';
+      if (v.note.length > 500) errs.note = 'Please keep the note under 500 characters.';
+      fields.forEach((f) => setErr(f, errs[f] || ''));
+      const first = fields.find((f) => errs[f]);
+      if (first) get(first).focus();
+      return !first;
+    };
+
+    fields.forEach((f) =>
+      ['input', 'change'].forEach((eventName) => get(f).addEventListener(eventName, () => {
+        if (get(f).getAttribute('aria-invalid')) setErr(f, '');
+      })),
+    );
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      status.textContent = '';
+      if (honeypot?.value) return;
+      status.className = 'mt-4 text-[0.98rem]';
+      if (!validate()) {
+        status.textContent = 'Please fix the highlighted fields and try again.';
+        status.classList.add('text-[#ffb4a2]');
+        return;
+      }
+
+      if (!endpoint) {
+        status.textContent =
+          'Demo mode: your details look valid, but this build has no form endpoint, so nothing was sent. See the README to connect one.';
+        status.classList.add('text-accent');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { Accept: 'application/json' },
+          body: new FormData(form),
+        });
+        if (!res.ok) throw new Error('bad status ' + res.status);
+        (document.getElementById('f-success-name') as HTMLElement).textContent = ', ' + get('name').value.trim().split(' ')[0];
+        (document.getElementById('f-success-email') as HTMLElement).textContent = get('email').value.trim();
+        form.classList.add('hidden');
+        success.classList.remove('hidden');
+        success.focus();
+      } catch {
+        status.textContent = 'We could not send your request. Check your connection and try again, or email us directly.';
+        status.classList.add('text-[#ffb4a2]');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Send request';
+      }
+    });
+
+    document.getElementById('f-again')?.addEventListener('click', () => {
+      form.reset();
+      success.classList.add('hidden');
+      form.classList.remove('hidden');
+      (document.getElementById('f-guests') as HTMLSelectElement).value = '5';
+      get('name').focus();
+    });
+  }
+</script>
