@@ -1,5 +1,9 @@
 # Lowlight Coffee
 
+## Website Preview
+
+![Lowlight Coffee Website](./lowlight-coffee-preview.jpg)
+
 A fictional coffee-bar landing page built as a front-end portfolio concept by Ujang. The brand, address, menu, prices, opening hours and contact details are illustrative and do not represent a real business.
 
 ## Stack
